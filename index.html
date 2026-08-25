@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aquila – Genuss ohne Grenzen</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0f1115; color: #f3f4f6; line-height: 1.6; }
+
+        /* Navigation */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 5%; background: #181b20; border-bottom: 1px solid #2d333d; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.3rem; font-weight: bold; letter-spacing: 1px; color: #fff; }
+        .logo span { color: #e65100; }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; align-items: center; }
+        .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.95rem; }
+        .btn-admin { background: transparent; border: 1px solid #e65100; color: #e65100; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Hero */
+        .hero { padding: 4rem 5%; text-align: center; background: #14171d; border-bottom: 1px solid #2d333d; }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: #fff; }
+        .hero p { color: #9ca3af; font-size: 1rem; max-width: 600px; margin: 0 auto 1.5rem; }
+        .badges { display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; }
+        .badge { background: #181b20; border: 1px solid #2d333d; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #e65100; }
+
+        /* Speisekarte */
+        section { padding: 3rem 5%; }
+        h2 { text-align: center; font-size: 1.8rem; margin-bottom: 2rem; color: #fff; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+        .card { background: #181b20; border: 1px solid #2d333d; border-radius: 10px; overflow: hidden; }
+        .card-img { width: 100%; height: 160px; object-fit: cover; background-color: #222; }
+        .card-body { padding: 1.2rem; }
+        .card-title { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .price { color: #e65100; }
+        .card-desc { color: #9ca3af; font-size: 0.88rem; }
+
+        /* Admin Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #181b20; border: 1px solid #2d333d; width: 90%; max-width: 500px; padding: 1.5rem; border-radius: 10px; max-height: 90vh; overflow-y: auto; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; font-size: 0.85rem; color: #9ca3af; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.6rem; background: #0f1115; border: 1px solid #2d333d; color: #fff; border-radius: 5px; }
+        .btn-submit { width: 100%; background: #e65100; color: #fff; border: none; padding: 0.7rem; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        
+        footer { text-align: center; padding: 1.5rem; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2d333d; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">AQUILA <span>GENUSS</span></div>
+        <ul class="nav-links">
+            <li><a href="#speisekarte">Menü</a></li>
+            <li><button class="btn-admin" onclick="toggleAdmin()">Admin</button></li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <h1>Aquila Genuss ohne Grenzen</h1>
+        <p>Neapolitanische Pizza & italienische Spezialitäten in Hochheim am Main.</p>
+        <div class="badges">
+            <div class="badge">★ 4.6 / 5 Sterne (103+ Bewertungen)</div>
+            <div class="badge">✂ Serviert mit Schere</div>
+            <div class="badge">📍 Edelstraße 2, Hochheim</div>
+        </div>
+    </header>
+
+    <section id="speisekarte">
+        <h2>Speisekarte</h2>
+        <div class="menu-grid" id="menu-container"></div>
+    </section>
+
+    <!-- Admin Dashboard Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3>Admin Dashboard</h3>
+                <button onclick="toggleAdmin()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <form id="add-form">
+                <div class="form-group">
+                    <label>Gericht Name</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Preis (€)</label>
+                    <input type="text" id="price" required placeholder="12,50">
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <textarea id="desc" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Bild-Datei auswählen</label>
+                    <input type="file" id="img" accept="image/*" onchange="handleImage(event)">
+                </div>
+                <button type="submit" class="btn-submit">Gericht Hinzufügen</button>
+            </form>
+            <hr style="border-color:#2d333d; margin:1.5rem 0;">
+            <div id="admin-list"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Aquila Genuss ohne Grenzen – Edelstraße 2, Hochheim am Main</p>
+    </footer>
+
+    <script>
+        const initialItems = [
+            { id: 1, title: "Pizza Margherita", price: "9,50 €", desc: "San Marzano Tomaten, Fior di Latte, Basilikum, Olivenöl.", img: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=500&q=80" },
+            { id: 2, title: "Pizza Diavola", price: "12,00 €", desc: "Scharfe ital. Salami, Fior di Latte, Chiliöl.", img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=80" },
+            { id: 3, title: "Pizza Nutella Amore", price: "8,50 €", desc: "Süße Pizza mit Nutella – perfekt als Nachtisch.", img: "https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?auto=format&fit=crop&w=500&q=80" }
+        ];
+
+        let base64Image = "";
+
+        function getItems() {
+            const data = localStorage.getItem('aquila_items');
+            return data ? JSON.parse(data) : initialItems;
+        }
+
+        function render() {
+            const items = getItems();
+            const container = document.getElementById('menu-container');
+            const adminContainer = document.getElementById('admin-list');
+            
+            container.innerHTML = "";
+            adminContainer.innerHTML = "<h4>Vorhandene Gerichte:</h4><br>";
+
+            items.forEach(item => {
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${item.img}" class="card-img" alt="${item.title}">
+                        <div class="card-body">
+                            <div class="card-title">
+                                <span>${item.title}</span>
+                                <span class="price">${item.price}</span>
+                            </div>
+                            <div class="card-desc">${item.desc}</div>
+                        </div>
+                    </div>
+                `;
+
+                adminContainer.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; align-items:center;">
+                        <span style="font-size:0.9rem;">${item.title} (${item.price})</span>
+                        <button onclick="deleteItem(${item.id})" style="background:#dc2626; color:#fff; border:none; padding:0.2rem 0.5rem; border-radius:3px; cursor:pointer;">Löschen</button>
+                    </div>
+                `;
+            });
+        }
+
+        function handleImage(e) {
+            const reader = new FileReader();
+            reader.onload = function() { base64Image = reader.result; };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        document.getElementById('add-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const items = getItems();
+            items.push({
+                id: Date.now(),
+                title: document.getElementById('title').value,
+                price: document.getElementById('price').value + " €",
+                desc: document.getElementById('desc').value,
+                img: base64Image || "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80"
+            });
+            localStorage.setItem('aquila_items', JSON.stringify(items));
+            this.reset();
+            base64Image = "";
+            render();
+        });
+
+        function deleteItem(id) {
+            let items = getItems().filter(i => i.id !== id);
+            localStorage.setItem('aquila_items', JSON.stringify(items));
+            render();
+        }
+
+        function toggleAdmin() {
+            const modal = document.getElementById('adminModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        render();
+    </script>
+</body>
+</html>
